@@ -5,11 +5,13 @@
 1. Import this repo in your Genezio account
 2. Add the "OPENAI_API_KEY" env var.
 
-This sohould be a valid OpenAI API Key
+This should be a valid OpenAI API Key
 
 3. Add the "SEARCH_URL" env var with the URL you want to crawl
 
 The program will crawl all pages linked to this URL that are sub-pages (their respective URL starts with the SEARCH_URL). An example of such an URL us "https://genezio.com/docs/"
+
+4. Add the "COLLECTION_NAME" env var with the name of the collection you want for this specific domain. This is so that you can reuse the mongo db for multiple similar such projects
 
 ## Usage
 
