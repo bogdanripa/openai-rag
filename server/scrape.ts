@@ -78,7 +78,7 @@ export class Scrape {
     const queue: string[] = [startUrl];
 
     const processUrl = async (url: string): Promise<boolean> => {
-      const existingPage = await DB.findPage('pages', { url });
+      const existingPage = await DB.findPage({ url });
       const isCached = existingPage && existingPage.lastIndexed > cacheThreshold;
       
       if (isCached) {
@@ -109,7 +109,7 @@ export class Scrape {
       const text = this.extractText(html);
       const links = this.extractLinks(html, startUrl, pathFilter);
 
-      await DB.findOneAndUpdate('pages', url, text, links);
+      await DB.findOneAndUpdate(url, text, links);
 
       links.forEach((link) => {
         if (!visited.has(link) && !queue.includes(link)) {
@@ -117,7 +117,7 @@ export class Scrape {
           totalPages++;
         }
       });
-      await DB.updateScrapingStatus("pages", visited.size, totalPages);
+      await DB.updateScrapingStatus(visited.size, totalPages);
       return true;
     };
 
@@ -137,13 +137,13 @@ export class Scrape {
         await Promise.all(workers);
       }
     }
-    await DB.updateScrapingStatus("pages", visited.size, totalPages);
+    await DB.updateScrapingStatus(visited.size, totalPages);
 
     console.log("Finished scraping.");
   }
 
   async status(): Promise<any> {
-    const status = await DB.getStatus('pages');
+    const status = await DB.getStatus();
     return status;
   }
 

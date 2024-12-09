@@ -11,7 +11,7 @@ export class Vector {
   }
 
   async saveEmbeddings() {
-    const pages = await DB.findPages('pages', { embedding: { $size: 0 }});
+    const pages = await DB.findPages({ embedding: { $size: 0 }});
 
     for (const page of pages) {
       if (!page.text)
@@ -22,11 +22,11 @@ export class Vector {
         page.embedding = embedding;
         await page.save();
         console.log(`Saved embedding for page: ${page.url}`);
-        await DB.updateIndexingStatus("pages");
+        await DB.updateIndexingStatus();
       } catch (error) {
         console.error(`Failed to save embedding for page: ${page.url}`, error);
       }
     }
-    await DB.updateIndexingStatus("pages");
+    await DB.updateIndexingStatus();
   }
 }

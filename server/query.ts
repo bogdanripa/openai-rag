@@ -14,7 +14,7 @@ export class Query {
   private async findRelevantPages (query: string, topK:number = 5): Promise<any[]> {
     try {
       const queryEmbedding = await this.oai.generateEmbedding(query);
-      return await DB.findRelevantPages('pages', queryEmbedding, topK);
+      return await DB.findRelevantPages(queryEmbedding, topK);
     } catch (error) {
       console.error('Error finding relevant pages:', error);
       throw error;

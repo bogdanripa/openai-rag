@@ -40,7 +40,7 @@ export default class DB {
       mongoose.connect(process.env.MY_MONGO_DB_DATABASE_URL);
     }
 
-    static getPageModel(collectionName: string) {
+    static getPageModel() {
         if (DB.pageModel) {
             return DB.pageModel;
         }
@@ -48,11 +48,11 @@ export default class DB {
             DB.connect();
             DB.connected = true;
         }
-        DB.pageModel = model<Page>("Page", pageSchema, collectionName);
+        DB.pageModel = model<Page>("Page", pageSchema, process.env.COLLECTION_NAME || 'pages');
         return DB.pageModel;
     }
 
-    static getStatusModel(collectionName: string) {
+    static getStatusModel() {
         if (DB.statusModel) {
             return DB.statusModel;
         }
@@ -60,12 +60,12 @@ export default class DB {
             DB.connect();
             DB.connected = true;
         }
-        DB.statusModel = model<Status>("Status", statusSchema, collectionName + "_status");
+        DB.statusModel = model<Status>("Status", statusSchema, (process.env.COLLECTION_NAME || 'pages') + "_status");
         return DB.statusModel;
     }
 
-    static async findRelevantPages(collectionName: string, queryEmbedding: any, topK: number) {
-        return await DB.getPageModel(collectionName).aggregate([
+    static async findRelevantPages(queryEmbedding: any, topK: number) {
+        return await DB.getPageModel().aggregate([
             {
               $addFields: {
                 similarity: {
@@ -92,19 +92,19 @@ export default class DB {
           ]);
     }
 
-    static async findPages(collectionName: string, query: any) {
-        return await this.getPageModel(collectionName).find({ embedding: { $size: 0 } });
+    static async findPages(query: any) {
+        return await this.getPageModel().find({ embedding: { $size: 0 } });
     }
 
-    static async findPage(collectionName: string, query: any) {
-        return await this.getPageModel(collectionName).findOne(query);
+    static async findPage(query: any) {
+        return await this.getPageModel().findOne(query);
     }
 
-    static async findOneAndUpdate(collectionName: string, url: string, text: string, links: string[], embedding: number[]|undefined=undefined) {
+    static async findOneAndUpdate(url: string, text: string, links: string[], embedding: number[]|undefined=undefined) {
       if (text == '') {
         text = 'nothing, zero, nada';
       }
-      return await DB.getPageModel(collectionName).
+      return await DB.getPageModel().
           findOneAndUpdate(
               { url },
               { url, text, links, lastIndexed: new Date(), embedding },
@@ -112,24 +112,24 @@ export default class DB {
           )
     }
 
-    static async updateScrapingStatus(collectionName: string, processed: number, from: number) {
-      await DB.getStatusModel(collectionName).findOneAndUpdate(
+    static async updateScrapingStatus(processed: number, from: number) {
+      await DB.getStatusModel().findOneAndUpdate(
         {},
         { totalPages: from, scrapedPages: processed },
         { upsert: true }
       );
     }
 
-    static async updateIndexingStatus(collectionName: string) {
-      const processed = await DB.getPageModel(collectionName).countDocuments({ "embedding.0": { "$exists": true } });
-      await DB.getStatusModel(collectionName).findOneAndUpdate(
+    static async updateIndexingStatus() {
+      const processed = await DB.getPageModel().countDocuments({ "embedding.0": { "$exists": true } });
+      await DB.getStatusModel().findOneAndUpdate(
         {},
         { indexedPages: processed },
         { upsert: true }
       );
     }
 
-    static async getStatus(collectionName: string) {
-      return await DB.getStatusModel(collectionName).findOne();
+    static async getStatus() {
+      return await DB.getStatusModel().findOne();
     }
 }
