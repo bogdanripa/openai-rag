@@ -142,7 +142,7 @@ export class Scrape {
     console.log("Finished scraping.");
   }
 
-  async status(): any {
+  async status(): Promise<any> {
     const status = await DB.getStatus('pages');
     return status;
   }

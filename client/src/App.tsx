@@ -48,7 +48,7 @@ export default function App() {
 
       if (status.totalPages == 0 && !scraping.current) {
         scraping.current = true;
-        Scrape.scrape("https://genezio.com/docs/");
+        Scrape.scrape();
       }
 
       if (status.totalPages > 0 && status.scrapedPages == status.totalPages && status.indexedPages == 0 && !indexing.current) {

@@ -19,7 +19,6 @@ frontend:
             - npm run dev --silent
     sdk:
         language: ts
-    subdomain: opanai-rag
 name: opanai-rag
 region: eu-central-1
 yamlVersion: 2
