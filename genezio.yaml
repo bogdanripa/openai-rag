@@ -4,8 +4,12 @@ backend:
         packageManager: npm
     path: server
     scripts:
-        deploy: npm run build; npm install
-        local: npm run build; npm install
+        deploy:
+            - npm install
+            - npm run build 
+        local:
+            - npm install
+            - npm run build
     functions:
         - name: query
           path: ./
