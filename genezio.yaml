@@ -4,8 +4,14 @@ backend:
         packageManager: npm
     path: server
     scripts:
-        deploy: npm install
-        local: npm install
+        deploy: npm run build; npm install
+        local: npm run build; npm install
+    functions:
+        - name: query
+          path: ./
+          handler: generateResponse
+          entry: build/query.mjs
+          type: aws
 frontend:
     path: client
     publish: dist
@@ -19,6 +25,9 @@ frontend:
             - npm run dev --silent
     sdk:
         language: ts
+    environment:
+        VITE_QUERY_FUNCTION_URL: ${{backend.functions.query.url}}
+    subdomain: openai-rag
 name: opanai-rag
 region: eu-central-1
 yamlVersion: 2

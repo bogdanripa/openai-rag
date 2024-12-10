@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Query, Scrape, Vector } from "@genezio-sdk/opanai-rag";
+import { Scrape, Vector } from "@genezio-sdk/opanai-rag";
 import "./App.css";
 import ReactMarkdown from 'react-markdown';
 
 export default function App() {
   const [query, setQuery] = useState("");
   const [response, setResponse] = useState("");
-  const [links, setLinks] = useState([]);
+  const [links, setLinks] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(-1);
   const [scrapedPages, setScrapedPages] = useState(0);
   const [indexedPages, setIndexedPages] = useState(0);
@@ -20,9 +20,54 @@ export default function App() {
     setSearching(true);
     setResponse("");
     setLinks([]);
-    const sr = await Query.generateResponse(query);
-    setResponse(sr.response);
-    setLinks(sr.links);
+
+    const response = await fetch(import.meta.env.VITE_QUERY_FUNCTION_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: query})
+    });
+
+    if (response.body) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let result = "";
+      let linksReceived = false;
+      const lLinks = [];
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          break; // Exit loop when the stream is done
+        }
+        
+        // Decode and append the chunk
+        const chunk = decoder.decode(value, { stream: true });
+        result += chunk;
+        if (!linksReceived) {
+          while(true) {
+            const link = result.match(/^(.+)\n/);
+            if (link) {
+              // found a link
+              lLinks.push(link[1]);
+              result = result.replace(/^.+\n/, "");
+            } else
+              break;
+          }
+          if (result.match(/^\n/)) {
+            // end links
+            result = result.replace(/^\n/, "");
+            linksReceived = true;
+            setLinks(lLinks);
+          }
+        }
+        
+        if (linksReceived) {
+          setResponse(result);
+        }
+      }
+    }
     setSearching(false);
   }
 

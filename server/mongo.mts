@@ -93,7 +93,7 @@ export default class DB {
     }
 
     static async findPages(query: any) {
-        return await this.getPageModel().find({ embedding: { $size: 0 } });
+        return await this.getPageModel().find(query);
     }
 
     static async findPage(query: any) {

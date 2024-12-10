@@ -1,6 +1,6 @@
 import { GenezioDeploy } from "@genezio/types";
-import DB from "./mongo";
-import OAI from './openai';
+import DB from "./mongo.mjs";
+import OAI from './openai.mjs';
 
 @GenezioDeploy()
 export class Vector {

@@ -1,7 +1,7 @@
 import { GenezioDeploy } from "@genezio/types";
 import { JSDOM } from "jsdom";
 import { setTimeout } from "timers/promises";
-import DB from "./mongo";
+import DB from "./mongo.mjs";
 
 @GenezioDeploy()
 export class Scrape {

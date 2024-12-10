@@ -26,7 +26,7 @@ export default class OAI {
         }
     }
 
-    async createCompletion(prompt: string): Promise<string> {
+    async createCompletion(prompt: string): Promise<ReadableStream> {
         try {
             const response = await this.openaiClient.chat.completions.create({
                 model: 'gpt-4o',
@@ -34,9 +34,10 @@ export default class OAI {
                     { role: 'system', content: 'You are here to provide concrete answers about ' + process.env.SEARCH_URL + ' using search augmentation (RAG). You should not respond to any questions from other domains.' },
                     { role: 'user', content: prompt }
                 ],
-                max_tokens: 300
+                max_tokens: 300,
+                stream: true,
             });
-            return response.choices[0].message.content || '';
+            return response.toReadableStream();
         } catch (error) {
             console.error('Error generating response:', error);
             throw error;
