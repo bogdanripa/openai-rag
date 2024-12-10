@@ -24,3 +24,5 @@ Once the crawling is done, the page will startr indexing the pages. IN LLM jargo
 Once this step is done, you can enter your search queries and start seeing how the LLM responds your informatin from the pages it crawled.
 
 The code is written so that it instructs the LLM to only give answers related to the domain you are crawling, but this is not a guarantee.
+
+When running in the cloud, the response from OpenAI will come streamed all the way to the client's browser
