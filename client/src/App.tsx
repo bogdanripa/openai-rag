@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Scrape, Vector } from "@genezio-sdk/opanai-rag";
 import "./App.css";
 import ReactMarkdown from 'react-markdown';
 
@@ -13,8 +12,7 @@ export default function App() {
   const [searching, setSearching] = useState(false);
   const [searchUrl, setSearchUrl] = useState("");
   const loading = useRef(true);
-  const scraping = useRef(false);
-  const indexing = useRef(false);
+  const receiving = useRef(false);
 
   async function search() {
     setSearching(true);
@@ -72,38 +70,86 @@ export default function App() {
   }
 
   async function scrape() {
-    await Scrape.scrape();
+    callLonRunning(import.meta.env.VITE_SCRAPE_FUNCTION_URL);
   }
 
   async function index() {
-    await Vector.saveEmbeddings();
+    callLonRunning(import.meta.env.VITE_INDEX_FUNCTION_URL);
   }
 
-  function refreshStatus() {
-    Scrape.status().then((status: any) => {
-      if (!status) {
-        status = { totalPages: 0, scrapedPages: 0, indexedPages: 0 };
+  async function callLonRunning(url: string, cnt:number=3) {
+    try {
+      const response = await fetch(url);
+      if (response.body) {
+        receiving.current = true;
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let result = "";
+        let finished = false;
+  
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            break; // Exit loop when the stream is done
+          }
+          
+          // Decode and append the chunk
+          const chunk = decoder.decode(value, { stream: true });
+          result += chunk;
+          if (result.match(/^s \d+\/\d+\n/)) {
+            const [scraped, total] = result.match(/^s (\d+)\/(\d+)\n/)?.slice(1) || [];
+            setScrapedPages(parseInt(scraped));
+            setTotalPages(parseInt(total));
+            result = result.replace(/^s \d+\/\d+\n/, "");
+            if (scraped == total) {
+              receiving.current = false;
+              finished = true;
+              index();
+            }
+          }
+          if (result.match(/^i \d+\/\d+\n/)) {
+            const [indexed, total] = result.match(/^i (\d+)\/(\d+)\n/)?.slice(1) || [];
+            setIndexedPages(parseInt(indexed));
+            setTotalPages(parseInt(total));
+            result = result.replace(/^i \d+\/\d+\n/, "");
+            if (indexed == total) {
+              receiving.current = false;
+              finished = true;
+            }
+          }
+        }
+        if (!finished) {
+          throw new Error("Stream ended unexpectedly");
+        }
       }
-      if (!status.indexedPages) {
-        status.indexedPages = 0;
-      }
-      setTotalPages(status.totalPages);
-      setScrapedPages(status.scrapedPages);
-      setIndexedPages(status.indexedPages);
 
-      if (status.totalPages == 0 && !scraping.current) {
-        scraping.current = true;
-        Scrape.scrape();
-      }
 
-      if (status.totalPages > 0 && status.scrapedPages == status.totalPages && status.indexedPages == 0 && !indexing.current) {
-        indexing.current = true;
-        Vector.saveEmbeddings();
-      }
+    } catch (e) {
+      console.error(e);
+      setTimeout(() => callLonRunning(url, cnt+1), cnt*1000);
+    } 
+  }
 
-      if (status.totalPages == 0 || status.scrapedPages != status.totalPages || status.indexedPages != status.totalPages)
-        setTimeout(refreshStatus, 1000);
-    });
+  async function refreshStatus(firstTime: boolean = false) {
+    if (receiving.current)
+      return;
+
+    let status:any = await (await fetch(import.meta.env.VITE_STATUS_FUNCTION_URL)).json();
+
+    setTotalPages(status.totalPages);
+    setScrapedPages(status.scrapedPages);
+    setIndexedPages(status.indexedPages);
+
+    if (firstTime && (status.scrapedPages == 0 || status.totalPages !=  status.scrapedPages)) {
+      receiving.current = false;
+      scrape();
+    } else if (firstTime && status.totalPages == status.scrapedPages && status.totalPages != status.indexedPages) {
+      receiving.current = false;
+      index();
+    }
+
+    if (status.totalPages == 0 || status.scrapedPages != status.totalPages || status.indexedPages != status.totalPages)
+      setTimeout(refreshStatus, 3000);
   }
 
   useEffect(() => {
@@ -112,11 +158,12 @@ export default function App() {
     }
     loading.current = false;
 
-    Scrape.getSearchUrl().then((url: string) => {
-      setSearchUrl(url);
-    });
-
-    refreshStatus();
+    fetch(import.meta.env.VITE_GET_SEARCH_URL_FUNCTION_URL)
+      .then((response) => response.text())
+      .then((url) => {
+        setSearchUrl(url);
+      });
+    refreshStatus(true);
   }, []);
 
   return (
@@ -134,13 +181,11 @@ export default function App() {
           {totalPages != scrapedPages && (
             <div>
               <div>Scraping in progress... {scrapedPages}/{totalPages}</div>
-              <button onClick={() => scrape()}>Continue scraping</button>
             </div>
           )}
           {totalPages == scrapedPages && totalPages != indexedPages && (
             <div>
               <div>Indexing in progress... {indexedPages}/{totalPages}</div>
-              <button onClick={() => index()}>Continue indexiong</button>
             </div>
           )}
           {totalPages == scrapedPages && totalPages == indexedPages && totalPages>0 && (

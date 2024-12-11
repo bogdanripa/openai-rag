@@ -15,9 +15,27 @@ backend:
           path: ./
           handler: generateResponse
           entry: build/query.mjs
-          type: aws
+        - name: scrape
+          path: ./
+          handler: scrape
+          entry: build/scrape.mjs
+          maxConcurrentRequestsPerInstance: 1
+        - name: status
+          path: ./
+          handler: status
+          entry: build/scrape.mjs
+        - name: getSearchUrl
+          path: ./
+          handler: getSearchUrl
+          entry: build/scrape.mjs
+        - name: index
+          path: ./
+          handler: index
+          entry: build/vector.mjs
+          maxConcurrentRequestsPerInstance: 1
 frontend:
     path: client
+    subdomain: openai-rag
     publish: dist
     scripts:
         build: npm run build
@@ -31,6 +49,10 @@ frontend:
         language: ts
     environment:
         VITE_QUERY_FUNCTION_URL: ${{backend.functions.query.url}}
+        VITE_SCRAPE_FUNCTION_URL: ${{backend.functions.scrape.url}}
+        VITE_STATUS_FUNCTION_URL: ${{backend.functions.status.url}}
+        VITE_GET_SEARCH_URL_FUNCTION_URL: ${{backend.functions.getSearchUrl.url}}
+        VITE_INDEX_FUNCTION_URL: ${{backend.functions.index.url}}
 name: opanai-rag
 region: eu-central-1
 yamlVersion: 2
