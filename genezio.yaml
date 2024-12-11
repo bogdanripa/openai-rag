@@ -31,7 +31,6 @@ frontend:
         language: ts
     environment:
         VITE_QUERY_FUNCTION_URL: ${{backend.functions.query.url}}
-    subdomain: openai-rag
 name: opanai-rag
 region: eu-central-1
 yamlVersion: 2

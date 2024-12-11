@@ -1,8 +1,13 @@
 # Genezio-based RAG (Retrieval-Augmented Generation) using OpenAI
 
-## Set-up:
+## Deploy your own instance:
 
-1. Import this repo in your Genezio account
+# Deploying this example
+
+1. Follow this flow to import this repo:
+[![Deploy to Genezio](https://raw.githubusercontent.com/Genez-io/graphics/main/svg/deploy-button.svg)](https://app.genez.io/start/deploy?repository=https://github.com/bogdanripa/openai-rag)
+
+
 2. Add the "OPENAI_API_KEY" env var.
 
 This should be a valid OpenAI API Key
