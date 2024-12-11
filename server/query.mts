@@ -3,7 +3,7 @@ import OAI from "./openai.mjs";
 
 const oai = new OAI();
 
-async function findRelevantPages(query, topK = 5) {
+async function findRelevantPages(query: string, topK = 5) {
   try {
     const queryEmbedding = await oai.generateEmbedding(query);
     return await DB.findRelevantPages(queryEmbedding, topK);
@@ -13,7 +13,7 @@ async function findRelevantPages(query, topK = 5) {
   }
 }
 
-export const generateResponse = async (event) => {
+export const generateResponse = async (event: any) => {
   // get the query from the body
   if (!event.body) {
     return {

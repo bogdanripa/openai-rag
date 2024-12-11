@@ -40,6 +40,16 @@ export default class DB {
       mongoose.connect(process.env.MY_MONGO_DB_DATABASE_URL);
     }
 
+    private static getCollectionName():string {
+      let cName = '';
+      if (process.env.COLLECTION_NAME) {
+        cName = process.env.COLLECTION_NAME.replace(/[^a-z]/gi, '-');
+      } else {
+        cName = process.env.SEARCH_URL?.replace(/^.*:\/\//, '').replace(/\//g, '').replace(/[^a-z]/gi, '-') || 'pages';
+      }
+      return cName;
+    }
+
     static getPageModel() {
         if (DB.pageModel) {
             return DB.pageModel;
@@ -48,7 +58,7 @@ export default class DB {
             DB.connect();
             DB.connected = true;
         }
-        DB.pageModel = model<Page>("Page", pageSchema, process.env.COLLECTION_NAME || 'pages');
+        DB.pageModel = model<Page>("Page", pageSchema, DB.getCollectionName());
         return DB.pageModel;
     }
 
@@ -60,7 +70,7 @@ export default class DB {
             DB.connect();
             DB.connected = true;
         }
-        DB.statusModel = model<Status>("Status", statusSchema, (process.env.COLLECTION_NAME || 'pages') + "_status");
+        DB.statusModel = model<Status>("Status", statusSchema, DB.getCollectionName() + "_status");
         return DB.statusModel;
     }
 
