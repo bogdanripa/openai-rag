@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@genezio-sdk/opanai-rag": "^1.0.0-prod",
     "install": "^0.13.0",
     "npm": "^10.9.2",
     "react": "^18.2.0",
