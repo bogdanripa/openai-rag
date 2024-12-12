@@ -17,7 +17,7 @@ export default class Scrape {
     }
   }
 
-  private static extractLinks(html: string, baseUrl: string, pathFilter: string): string[] {
+  private static extractLinks(html: string, baseUrl: string): string[] {
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
@@ -30,7 +30,7 @@ export default class Scrape {
           return null;
         }
       })
-      .filter((url): url is string => url !== null && url.startsWith(baseUrl) && url.includes(pathFilter));
+      .filter((url): url is string => url !== null && url.startsWith(baseUrl));
 
     // Extract links from window.location assignments
     const scriptLinks = Array.from(document.querySelectorAll("script"))
@@ -109,7 +109,7 @@ export default class Scrape {
       }
 
       const text = Scrape.extractText(html);
-      const links = Scrape.extractLinks(html, startUrl, pathFilter);
+      const links = Scrape.extractLinks(html, startUrl.replace(/\/[^\/]+$/, '/'));
 
       await DB.findOneAndUpdate(url, text, links);
 

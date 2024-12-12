@@ -22,7 +22,6 @@ frontend:
     scripts:
         build: npm run build
         deploy:
-            - npm install @genezio-sdk/${{projectName}}@1.0.0-${{stage}}
             - npm install
         start:
             - npm install --silent
