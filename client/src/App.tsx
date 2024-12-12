@@ -19,7 +19,7 @@ export default function App() {
     setResponse("");
     setLinks([]);
 
-    const response = await fetch(import.meta.env.VITE_QUERY_FUNCTION_URL, {
+    const response = await fetch(import.meta.env.VITE_API_URL + '/search', {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -70,11 +70,11 @@ export default function App() {
   }
 
   async function scrape() {
-    callLonRunning(import.meta.env.VITE_SCRAPE_FUNCTION_URL);
+    callLonRunning(import.meta.env.VITE_API_URL + '/scrape');
   }
 
   async function index() {
-    callLonRunning(import.meta.env.VITE_INDEX_FUNCTION_URL);
+    callLonRunning(import.meta.env.VITE_API_URL + '/index');
   }
 
   async function callLonRunning(url: string, cnt:number=3) {
@@ -134,7 +134,7 @@ export default function App() {
     if (receiving.current)
       return;
 
-    let status:any = await (await fetch(import.meta.env.VITE_STATUS_FUNCTION_URL)).json();
+    let status:any = await (await fetch(import.meta.env.VITE_API_URL + '/status')).json();
 
     setTotalPages(status.totalPages);
     setScrapedPages(status.scrapedPages);
@@ -158,10 +158,15 @@ export default function App() {
     }
     loading.current = false;
 
-    fetch(import.meta.env.VITE_GET_SEARCH_URL_FUNCTION_URL)
-      .then((response) => response.text())
-      .then((url) => {
-        setSearchUrl(url);
+    fetch(import.meta.env.VITE_API_URL + '/url')
+      .then((response:any) => {
+        response.text()
+          .then((responseTxt:string) => {
+            if (response.ok)
+              setSearchUrl(responseTxt);
+            else
+              alert(responseTxt);
+          });
       });
     refreshStatus(true);
   }, []);

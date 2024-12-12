@@ -4,25 +4,22 @@ export default class OAI {
     private openaiClient: OpenAI;
 
     constructor() {
-        if (!process.env.OPENAI_API_KEY) {
-            throw new Error('Missing OPENAI_API_KEY environment variable');
-        }
         this.openaiClient = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
+            apiKey: process.env.OPENAI_API_KEY || '',
         });
     }
 
     // Generate embeddings for a given text
     async generateEmbedding(text: string): Promise<number[]> {
         try {
-        const response = await this.openaiClient.embeddings.create({
-            model: 'text-embedding-ada-002',
-            input: text,
-        });
-        return response.data[0].embedding;
+            const response = await this.openaiClient.embeddings.create({
+                model: 'text-embedding-ada-002',
+                input: text,
+            });
+            return response.data[0].embedding;
         } catch (error) {
-        console.error('Error generating embedding:', error);
-        throw error;
+            console.error('Error generating embedding:', error);
+            throw error;
         }
     }
 
