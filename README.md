@@ -15,7 +15,11 @@ This should be a valid OpenAI API Key
 
 3. Add the "SEARCH_URL" env var with the URL you want to crawl
 
-The program will crawl all pages linked to this URL that are sub-pages (their respective URL starts with the SEARCH_URL). An example of such an URL us "https://genezio.com/docs/"
+The program will crawl all pages linked to this URL that are sub-pages (their respective URL starts with the SEARCH_URL). 
+
+Here are some examples of such URLs:
+- https://genezio.com/docs/
+- https://reactnative.dev/docs/next/getting-started
 
 ## Usage
 

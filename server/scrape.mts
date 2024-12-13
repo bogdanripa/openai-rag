@@ -21,6 +21,11 @@ export default class Scrape {
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
+    const sitemapLinks = Array.from(document.querySelectorAll("loc")).map((anchor: any) => {
+      return anchor.textContent;
+    })
+    .filter((url): url is string => url !== null && url.startsWith(baseUrl));
+
     const links = Array.from(document.querySelectorAll("a[href]"))
       .map((anchor: any) => {
         try {
@@ -45,7 +50,7 @@ export default class Scrape {
       })
       .filter((url): url is string => url !== null);
 
-    return Array.from(new Set([...links, ...scriptLinks]));
+    return Array.from(new Set([...links, ...scriptLinks, ...sitemapLinks]));
   }
 
   private static extractText (html: string): string {
@@ -54,7 +59,6 @@ export default class Scrape {
 
     // Remove <script> and <style> elements
     document.querySelectorAll("script, style").forEach((el) => el.remove());
-
     // Extract and return the text content of the body
     return document.body.textContent?.trim() || "";
   }
@@ -77,7 +81,7 @@ export default class Scrape {
     const cacheThreshold = new Date(Date.now() - ageDays * 24 * 60 * 60 * 1000);
     const visited = new Set<string>();
     let totalPages = 1;
-    const queue: string[] = [startUrl];
+    const queue: string[] = [startUrl.replace(/(^\w+:\/\/[\w\.]+\/).*$/, '$1sitemap.xml')];
 
     const processUrl = async (url: string): Promise<boolean> => {
       const existingPage = await DB.findPage({ url });

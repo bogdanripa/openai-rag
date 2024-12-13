@@ -32,7 +32,10 @@ app.get('/url', (req, res) => {
     try {
         res.send(Basics.getSearchUrl());
     } catch (e:any) {
-        res.status(500).send(e.message);
+        if (!res.headersSent) {
+            res.status(500);
+        }
+        res.send(e.message);
     }
 });
 
@@ -41,7 +44,10 @@ app.get('/status', async (req, res) => {
     try {
         res.json(await Basics.status());
     } catch (e:any) {
-        res.status(500).send(e.message);
+        if (!res.headersSent) {
+            res.status(500);
+        }
+        res.send(e.message);
     }
 });
 
@@ -50,7 +56,10 @@ app.get('/scrape', async (req, res: express.Response) => {
     try {
         await Scrape.scrape(res);
     } catch (e:any) {
-        res.status(500).send(e.message);
+        if (!res.headersSent) {
+            res.status(500);
+        }
+        res.send(e.message);
     }
 });
 
@@ -59,7 +68,10 @@ app.get('/index', async (req, res: express.Response) => {
     try {
         await Vector.index(res);
     } catch (e:any) {
-        res.status(500).send(e.message);
+        if (!res.headersSent) {
+            res.status(500);
+        }
+        res.send(e.message);
     }
 });
 
@@ -68,7 +80,10 @@ app.post('/search', async (req, res: express.Response) => {
     try {
         await Query.search(req.body.query, res);
     } catch (e:any) {
-        res.status(500).send(e.message);
+        if (!res.headersSent) {
+            res.status(500);
+        }
+        res.send(e.message);
     }
 });
 
