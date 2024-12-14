@@ -11,7 +11,7 @@ export default class Query {
       return await DB.findRelevantPages(queryEmbedding, topK);
     } catch (error) {
       console.error('Error finding relevant pages:', error);
-      throw error;
+      return [];
     }
   }
 
