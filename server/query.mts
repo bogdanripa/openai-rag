@@ -19,6 +19,8 @@ export default class Query {
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
+    console.log(query);
+
     const relevantPages: any[] = await Query.findRelevantPages(query);
 
     const context = relevantPages
