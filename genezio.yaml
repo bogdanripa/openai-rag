@@ -17,7 +17,6 @@ backend:
           type: httpServer
 frontend:
     path: client
-    subdomain: openai-rag
     publish: dist
     scripts:
         build: npm run build

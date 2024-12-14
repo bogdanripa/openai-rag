@@ -1,8 +1,12 @@
 # Genezio-based RAG (Retrieval-Augmented Generation) using OpenAI
 
-## Deploy your own instance:
+# Demo
 
-# Deploying this example
+https://openai-rag.app.genez.io
+
+# Deploy your own instance:
+
+## Deploying this example
 
 1. Follow this flow to import this repo:
 
