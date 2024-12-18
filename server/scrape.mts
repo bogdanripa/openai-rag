@@ -77,11 +77,10 @@ export default class Scrape {
     const ageDays: number = 7;
 
     console.log(`Starting scrapeing ${startUrl}`);
-    const pathFilter = Scrape.extractFolderAfterDomain(startUrl) || "/";
     const cacheThreshold = new Date(Date.now() - ageDays * 24 * 60 * 60 * 1000);
     const visited = new Set<string>();
-    let totalPages = 1;
-    const queue: string[] = [startUrl.replace(/(^\w+:\/\/[\w\.]+\/).*$/, '$1sitemap.xml')];
+    let totalPages = 2;
+    const queue: string[] = [startUrl, startUrl.replace(/(^\w+:\/\/[\w\.]+\/).*$/, '$1sitemap.xml')];
 
     const processUrl = async (url: string): Promise<boolean> => {
       const existingPage = await DB.findPage({ url });
