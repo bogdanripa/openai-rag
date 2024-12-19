@@ -53,14 +53,20 @@ export default class Scrape {
     return Array.from(new Set([...links, ...scriptLinks, ...sitemapLinks]));
   }
 
-  private static extractText (html: string): string {
+  private static extractText(html: string): string {
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
     // Remove <script> and <style> elements
-    document.querySelectorAll("script, style").forEach((el) => el.remove());
+    document.querySelectorAll('script, style').forEach((el) => el.remove());
     // Extract and return the text content of the body
-    return document.body.textContent?.trim() || "";
+    let text = document.body.textContent || '';
+    text = text.replace(/[\\n\\t]/g, ' ');
+    text = text.replace(/\s+/g, ' ');
+    text = text.trim();
+    text = text.substring(0, 9000 * 2);
+
+    return text;
   }
 
   // Main Scraper Function

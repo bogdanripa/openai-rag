@@ -29,7 +29,7 @@ frontend:
         language: ts
     environment:
         VITE_API_URL: ${{ backend.functions.express.url }}
-name: opanai-rag
+name: openai-rag
 region: eu-central-1
 yamlVersion: 2
 services:
