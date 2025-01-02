@@ -61,11 +61,10 @@ export default class Scrape {
     document.querySelectorAll('script, style').forEach((el) => el.remove());
     // Extract and return the text content of the body
     let text = document.body.textContent || '';
-    text = text.replace(/[\\n\\t]/g, ' ');
+    text = text.replace(/[\n\t]/g, ' ');
     text = text.replace(/\s+/g, ' ');
     text = text.trim();
     text = text.substring(0, 9000 * 2);
-
     return text;
   }
 
@@ -86,7 +85,7 @@ export default class Scrape {
     const cacheThreshold = new Date(Date.now() - ageDays * 24 * 60 * 60 * 1000);
     const visited = new Set<string>();
     let totalPages = 2;
-    const queue: string[] = [startUrl, startUrl.replace(/(^\w+:\/\/[\w\.]+\/).*$/, '$1sitemap.xml')];
+    const queue: string[] = [startUrl.replace(/(^\w+:\/\/[\w\.]+\/).*$/, '$1sitemap.xml'), startUrl];
 
     const processUrl = async (url: string): Promise<boolean> => {
       const existingPage = await DB.findPage({ url });
