@@ -110,14 +110,20 @@ export default class DB {
         return await this.getPageModel().findOne(query);
     }
 
-    static async findOneAndUpdate(url: string, text: string, links: string[], embedding: number[]|undefined=undefined) {
-      if (text == '') {
-        text = 'nothing, zero, nada';
-      }
+    static async findOneAndUpdate(url: string, text: string|undefined, links: string[]|undefined, embedding: number[]|undefined=undefined) {
+      const val:any = {
+        url,
+        lastIndexed: new Date()
+      };
+
+      if (text) val.text = text;
+      if (links) val.links = links;
+      if (embedding) val.embedding = embedding;
+
       return await DB.getPageModel().
           findOneAndUpdate(
               { url },
-              { url, text, links, lastIndexed: new Date(), embedding },
+              val,
               { upsert: true }
           )
     }

@@ -1,12 +1,25 @@
 import { OpenAI } from 'openai';
+import { encoding_for_model } from 'tiktoken';
 
 export default class OAI {
     private openaiClient: OpenAI;
+    private encoder: any;
 
     constructor() {
         this.openaiClient = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY || '',
         });
+        this.encoder = encoding_for_model('text-embedding-ada-002');
+    }
+
+    truncateText(text: string, maxTokens: number): string {
+        const tokens = this.encoder.encode(text);
+        if (tokens.length > maxTokens) {
+            const truncatedTokens = tokens.slice(0, maxTokens);
+            const bytes = this.encoder.decode(truncatedTokens);
+            text = new TextDecoder().decode(bytes);
+        }
+        return text;
     }
 
     // Generate embeddings for a given text
@@ -14,7 +27,7 @@ export default class OAI {
         try {
             const response = await this.openaiClient.embeddings.create({
                 model: 'text-embedding-ada-002',
-                input: text,
+                input: this.truncateText(text, 8192),
             });
             return response.data[0].embedding;
         } catch (error) {

@@ -64,7 +64,6 @@ export default class Scrape {
     text = text.replace(/[\n\t]/g, ' ');
     text = text.replace(/\s+/g, ' ');
     text = text.trim();
-    text = text.substring(0, 9000 * 2);
     return text;
   }
 
@@ -109,12 +108,20 @@ export default class Scrape {
         if (!response.ok) {
           html = response.statusText;
         } else {
-          html = await response.text();
+          const contentType = response.headers.get("Content-Type");
+          if (!contentType || !contentType.includes("text/html")) {
+            console.log(`Skipping non-HTML page: ${url}`);
+            html = '';
+          } else {
+            html = await response.text();
+          }
         }
       } catch (err) {
         console.error(`Error processing URL ${url}:`, err);
         html = err?.toString() || '';
       }
+
+      if (!html) html = 'empty';
 
       const text = Scrape.extractText(html);
       const links = Scrape.extractLinks(html, startUrl.replace(/\/[^\/]+$/, '/'));

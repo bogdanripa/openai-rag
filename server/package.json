@@ -16,7 +16,8 @@
         "mongoose": "^8.8.4",
         "node-fetch": "^3.3.2",
         "npm": "^10.9.2",
-        "openai": "^4.76.0"
+        "openai": "^4.76.0",
+        "tiktoken": "^1.0.18"
     },
     "prettier": {
         "tabWidth": 2

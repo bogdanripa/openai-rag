@@ -19,8 +19,7 @@ export default class Vector {
         continue;
       try {
         const embedding = await Vector.oai.generateEmbedding(page.text);
-        page.embedding = embedding;
-        await page.save();
+        await DB.findOneAndUpdate(page.url, undefined, undefined, embedding);
         console.log(`Saved embedding for page: ${page.url}`);
         await DB.updateIndexingStatus();
         if (true) {
