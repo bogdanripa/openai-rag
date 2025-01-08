@@ -4,19 +4,6 @@ import Basics from "./basics.mjs";
 import {Response} from 'express';
 
 export default class Scrape {
-
-  private static extractFolderAfterDomain(url: string): string | null {
-    try {
-      const parsedUrl = new URL(url); // Use the URL constructor to parse the URL
-      const pathname = parsedUrl.pathname; // Get the pathname part of the URL
-      const segments = pathname.split('/').filter(segment => segment.length > 0); // Split and filter out empty segments
-      return segments.length > 0 ? `/${segments[0]}/` : null; // Return the first segment with slashes
-    } catch (error) {
-      console.error('Invalid URL:', error);
-      return null;
-    }
-  }
-
   private static extractLinks(html: string, baseUrl: string): string[] {
     const dom = new JSDOM(html);
     const document = dom.window.document;
@@ -69,6 +56,7 @@ export default class Scrape {
 
   // Main Scraper Function
   static async scrape(res: Response) {
+    const startedAt = new Date().getTime();
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Transfer-Encoding', 'chunked');
 
@@ -153,15 +141,15 @@ export default class Scrape {
         await Promise.all(workers);
       }
       await DB.updateScrapingStatus(visited.size, totalPages);
-      if (true)
-        res.write(`s ${visited.size}/${totalPages}\n`);
+      res.write(`s ${visited.size}/${totalPages}\n`);
+      if ((new Date().getTime() - startedAt) > 1000 * 20) {
+        console.log("Time limit reached.");
+        res.end();
+        return;
+      }
     }
-    await DB.updateScrapingStatus(visited.size, totalPages);
 
     console.log("Finished scraping.");
-    if (true)
-      res.end();
-    else 
-      res.send(`s ${visited.size}/${totalPages}\n`);
+    res.end();
   }
 }
