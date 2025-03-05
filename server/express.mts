@@ -1,4 +1,5 @@
 import express, { Response } from 'express';
+import cors from "cors";
 import Basics from './basics.mjs';
 import Scrape from './scrape.mjs';
 import Vector from './vector.mjs';
@@ -6,6 +7,9 @@ import Query from './query.mjs';
 
 // Create an Express application
 const app = express();
+
+// allow requests
+app.use(cors());
 
 // Middleware to parse JSON requests
 app.use(express.json());

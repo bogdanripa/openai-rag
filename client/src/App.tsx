@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import "./App.css";
 import ReactMarkdown from 'react-markdown';
 
 export default function App() {
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [response, setResponse] = useState("");
   const [links, setLinks] = useState<string[]>([]);
   const [totalPages, setTotalPages] = useState(-1);
@@ -18,6 +20,7 @@ export default function App() {
     setSearching(true);
     setResponse("");
     setLinks([]);
+    setSearchParams({ q: query });
 
     const response = await fetch(import.meta.env.VITE_API_URL + '/search', {
       method: "POST",
@@ -162,8 +165,9 @@ export default function App() {
       .then((response:any) => {
         response.text()
           .then((responseTxt:string) => {
-            if (response.ok)
+            if (response.ok) {
               setSearchUrl(responseTxt);
+            }
             else
               alert(responseTxt);
           });
@@ -194,7 +198,7 @@ export default function App() {
             </div>
           )}
           {totalPages == scrapedPages && totalPages == indexedPages && totalPages>0 && (
-            <div className="card">
+            <div className="card search-container">
               <form onSubmit={(e) => {
                 e.preventDefault();
                 if (!searching)
@@ -205,8 +209,12 @@ export default function App() {
                   className="input-box"
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Enter your search query"
+                  value={query}
                   />
-                <button type="submit" disabled={searching}>
+                <button 
+                  type="submit" 
+                  className="search-btn"
+                  disabled={searching}>
                   {searching ? "searching..." : "search"}
                 </button>
               </form>
