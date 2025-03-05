@@ -148,4 +148,19 @@ export default class DB {
     static async getStatus() {
       return await DB.getStatusModel().findOne();
     }
-}
+
+    static async clearAll() {
+      await DB.getPageModel().deleteMany({});
+      await DB.getStatusModel().deleteMany({});
+    }
+
+    static async getAllPages() {
+      const pages = await DB.getPageModel().find({}, { url: 1, lastIndexed: 1, links: 1, _id: 0 }).lean();
+      const pagesObj = pages.reduce((acc: Record<string, Date | null>, page: any) => {
+          acc[page.url] = page;
+          return acc;
+      }, {});
+  
+      return pagesObj;
+    }
+  }

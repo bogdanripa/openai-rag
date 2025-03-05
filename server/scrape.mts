@@ -5,6 +5,9 @@ import {Response} from 'express';
 
 export default class Scrape {
   private static extractLinks(html: string, baseUrl: string): string[] {
+    html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
@@ -41,6 +44,9 @@ export default class Scrape {
   }
 
   private static extractText(html: string): string {
+    html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+    html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+
     const dom = new JSDOM(html);
     const document = dom.window.document;
 
@@ -63,6 +69,9 @@ export default class Scrape {
     if (!process.env.SEARCH_URL) {
       throw new Error('SEARCH_URL environment variable is not set.');
     }
+
+    //await DB.clearAll();
+
     const startUrl = process.env.SEARCH_URL;
     const parallelRequests: number = 10;
     const delaySeconds: number = 1;
@@ -73,9 +82,10 @@ export default class Scrape {
     const visited = new Set<string>();
     let totalPages = 2;
     const queue: string[] = [startUrl.replace(/(^\w+:\/\/[\w\.]+\/).*$/, '$1sitemap.xml'), startUrl];
+    const pagesInDB = await DB.getAllPages();
 
     const processUrl = async (url: string): Promise<boolean> => {
-      const existingPage = await DB.findPage({ url });
+      const existingPage = pagesInDB[url];
       const isCached = existingPage && existingPage.lastIndexed > cacheThreshold;
       
       if (isCached) {
@@ -140,14 +150,15 @@ export default class Scrape {
       if (workers.length > 0) {
         await Promise.all(workers);
       }
-      await DB.updateScrapingStatus(visited.size, totalPages);
       res.write(`s ${visited.size}/${totalPages}\n`);
       if ((new Date().getTime() - startedAt) > 1000 * 20) {
+        await DB.updateScrapingStatus(visited.size, totalPages);
         console.log("Time limit reached.");
         res.end();
         return;
       }
     }
+    await DB.updateScrapingStatus(visited.size, totalPages);
 
     console.log("Finished scraping.");
     res.end();
