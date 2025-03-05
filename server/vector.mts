@@ -16,8 +16,9 @@ export default class Vector {
     console.log(`Found ${pages.length} pages to index.`);
 
     for (const page of pages) {
-      if (!page.text)
-        continue;
+      if (!page.text) {
+        page.text = "nothing here";
+      }
       try {
         const embedding = await Vector.oai.generateEmbedding(page.text);
         await DB.findOneAndUpdate(page.url, undefined, undefined, embedding);
