@@ -29,7 +29,7 @@ frontend:
             - npm run dev --silent
     sdk:
         language: ts
-    subdomain: sameday
+    subdomain: whitesmoke-polynesian-wasp
 name: sameday
 region: eu-central-1
 services:
