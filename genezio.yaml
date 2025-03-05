@@ -1,4 +1,9 @@
 backend:
+    functions:
+        - entry: build/express.mjs
+          name: express
+          path: ./
+          type: httpServer
     language:
         name: ts
         packageManager: npm
@@ -6,16 +11,13 @@ backend:
     scripts:
         deploy:
             - npm install
-            - npm run build 
+            - npm run build
         local:
             - npm install
             - npm run build
-    functions:
-        - name: express
-          path: ./
-          entry: build/express.mjs
-          type: httpServer
 frontend:
+    environment:
+        VITE_API_URL: ${{ backend.functions.express.url }}
     path: client
     publish: dist
     scripts:
@@ -27,13 +29,12 @@ frontend:
             - npm run dev --silent
     sdk:
         language: ts
-    environment:
-        VITE_API_URL: ${{ backend.functions.express.url }}
-name: openai-rag
+    subdomain: sameday
+name: sameday
 region: eu-central-1
-yamlVersion: 2
 services:
     databases:
         - name: my-mongo-db
           region: eu-central-1
           type: mongo-atlas
+yamlVersion: 2
